@@ -1,9 +1,9 @@
 import logging
 import os
 import re
-
-from thonny import get_workbench
+from thonny import get_workbench, get_runner
 from thonny.ui_utils import scale
+from thonny.ui_utils import select_sequence
 
 
 #Where is the functionality/backend for this code implemented?
@@ -284,6 +284,30 @@ def update_fonts():
             font.nametofont(name).configure(**options)
 
 
+
+#Callback Function to change interpreter to MicroPython
+def switch_to_microPython():
+
+    #Configure the default interpreter value to be an ESP32
+    get_workbench().set_option("run.backend_name", "ESP32")
+ 
+    #Restart backend to implement changes with the new interpreter
+    get_runner().restart_backend(False)
+
+
+
+#Callback function to change interpreter to regular Python on computer
+def switch_to_python():
+
+    #Configure the default interpreter value to be an ESP32
+    get_workbench().set_option("run.backend_name", "SameAsFrontend")
+ 
+    #Restart backend to implement changes with the new interpreter
+    get_runner().restart_backend(False)
+
+
+
+
 def load_plugin():
 
 
@@ -343,22 +367,34 @@ def load_plugin():
     #Set our theme equal to the default theme during the launch of the IDE
     get_workbench().set_option("view.ui_theme", "JuiceMind-Theme")
 
-    #1. Change the given UI buttons for the open and save button within res
-
-    #2. Implement different buttons
-
-        # - Reset button
-
-        # - Connect Button
-
-        # - Computer Selection Button
-
-        # - MCU Selection Button
 
 
-    
+    #Add a button to switch to MicroPython Interpreter
+    get_workbench().add_command("Switch MicroPython", "tools", "Run with MicroPython",
+                                switch_to_microPython,
+                                default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                                group=120,
+                                caption="Use MicroPython",
+                                include_in_toolbar=False)
 
-     
+
+    #Add command on toolabr to implement regular Python Interpreter
+    get_workbench().add_command("Switch Regular Python", "tools", "Run with Computer Python",
+                                switch_to_python,
+                                default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                                group=120,
+                                caption="Use Python",
+                                include_in_toolbar=False)
+
+
+
+
+   
+
+
+
+
+
 
 
 
