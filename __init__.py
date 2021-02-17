@@ -5,6 +5,8 @@ from thonny import get_workbench, get_runner
 from thonny.ui_utils import scale
 from thonny.ui_utils import select_sequence
 
+#Import class?
+
 
 #Where is the functionality/backend for this code implemented?
 
@@ -20,7 +22,14 @@ GLOBAL_CONFIGURATION_PATH = os.path.join("/etc/xdg/lxsession", DESKTOP_SESSION, 
 
 logger = logging.getLogger(__name__)
 
-#Where is this called?
+
+#Instance variables
+count = 0
+
+
+
+
+
 
 def pix():
 
@@ -290,6 +299,18 @@ def switch_to_microPython():
 
     #Configure the default interpreter value to be an ESP32
     get_workbench().set_option("run.backend_name", "ESP32")
+
+
+    p = get_workbench().get_backends()["ESP32"].proxy_class
+
+    #Checks that an ESP32 device is connected
+    print(p.get_switcher_entries())
+
+    #Allows differentiation between ports and MCUs that are connected    
+    print(p._detect_potential_ports())
+
+
+    get_workbench().set_option("ESP32.port", "auto")
  
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
@@ -305,11 +326,9 @@ def switch_to_python():
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
 
-
-
+  
 
 def load_plugin():
-
 
     #No idea what the screenwidth condition does. I don't think it increases the screen size
     if get_workbench().get_ui_mode() == "simple" and get_workbench().winfo_screenwidth() >= 1280:
@@ -349,10 +368,6 @@ def load_plugin():
             "quit": "quit.png",
         }
 
-
-
-
-
     #Change the types of input images depending on the image that is selected.
     res_dir = os.path.join(os.path.dirname(__file__), "res")
     theme_image_map = {}
@@ -385,6 +400,18 @@ def load_plugin():
                                 group=120,
                                 caption="Use Python",
                                 include_in_toolbar=False)
+
+
+
+
+
+    
+
+
+    
+
+
+
 
 
 
