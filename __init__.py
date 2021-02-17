@@ -5,10 +5,57 @@ from thonny import get_workbench, get_runner
 from thonny.ui_utils import scale
 from thonny.ui_utils import select_sequence
 
-#Import class?
+import logging
+import threading
+import time
 
 
-#Where is the functionality/backend for this code implemented?
+
+
+
+
+class ThreadingExample(object):
+    """ Threading example class
+    The run() method will be started and it will run in the background
+    until the application exits.
+    """
+
+    def __init__(self, interval=1):
+        """ Constructor
+        :type interval: int
+        :param interval: Check interval, in seconds
+        """
+        self.interval = interval
+        
+
+        thread = threading.Thread(target=self.run, args=())
+        thread.daemon = True                            # Daemonize thread
+        thread.start()                                  # Start the execution
+
+    def run(self):
+        """ Method that runs forever """
+        
+    
+        temp = get_workbench().get_backends()
+        
+        #Wait for startup
+        while not bool(temp):
+            print("Waiting for Thonny to launch")
+            time.sleep(1) 
+
+        #Initialize ESP32 Proxy
+        proxy = temp["ESP32"].proxy_class
+
+        #Poll indefinitely until a connection is met
+        while True:
+  
+            if len(proxy.get_switcher_entries())  > 0:
+                print("Connected")
+
+            else:
+                print("Not Connected")
+
+            time.sleep(2)
 
 
 #Don't undestand what these do
@@ -301,15 +348,6 @@ def switch_to_microPython():
     get_workbench().set_option("run.backend_name", "ESP32")
 
 
-    p = get_workbench().get_backends()["ESP32"].proxy_class
-
-    #Checks that an ESP32 device is connected
-    print(p.get_switcher_entries())
-
-    #Allows differentiation between ports and MCUs that are connected    
-    print(p._detect_potential_ports())
-
-
     get_workbench().set_option("ESP32.port", "auto")
  
     #Restart backend to implement changes with the new interpreter
@@ -326,7 +364,8 @@ def switch_to_python():
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
 
-  
+
+
 
 def load_plugin():
 
@@ -367,6 +406,9 @@ def load_plugin():
             "zoom": "zoom.png",
             "quit": "quit.png",
         }
+
+
+    example = ThreadingExample()
 
     #Change the types of input images depending on the image that is selected.
     res_dir = os.path.join(os.path.dirname(__file__), "res")
