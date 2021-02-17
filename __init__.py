@@ -11,53 +11,6 @@ import time
 
 
 
-
-
-
-class ThreadingExample(object):
-    """ Threading example class
-    The run() method will be started and it will run in the background
-    until the application exits.
-    """
-
-    def __init__(self, interval=1):
-        """ Constructor
-        :type interval: int
-        :param interval: Check interval, in seconds
-        """
-        self.interval = interval
-        
-
-        thread = threading.Thread(target=self.run, args=())
-        thread.daemon = True                            # Daemonize thread
-        thread.start()                                  # Start the execution
-
-    def run(self):
-        """ Method that runs forever """
-        
-    
-        temp = get_workbench().get_backends()
-        
-        #Wait for startup
-        while not bool(temp):
-            print("Waiting for Thonny to launch")
-            time.sleep(1) 
-
-        #Initialize ESP32 Proxy
-        proxy = temp["ESP32"].proxy_class
-
-        #Poll indefinitely until a connection is met
-        while True:
-  
-            if len(proxy.get_switcher_entries())  > 0:
-                print("Connected")
-
-            else:
-                print("Not Connected")
-
-            time.sleep(2)
-
-
 #Don't undestand what these do
 
 DESKTOP_SESSION = os.environ.get("DESKTOP_SESSION", "_")
@@ -72,10 +25,6 @@ logger = logging.getLogger(__name__)
 
 #Instance variables
 count = 0
-
-
-
-
 
 
 def pix():
@@ -340,6 +289,35 @@ def update_fonts():
             font.nametofont(name).configure(**options)
 
 
+#Polls from ESP32 proxy in order to check if MCU connection is established
+def check_mcu_connection():
+    """ Method that runs forever """
+        
+    temp = get_workbench().get_backends()
+        
+    #Wait for startup
+    while not bool(temp):
+        print("Waiting for Thonny to launch")
+        time.sleep(1) 
+
+    #Initialize ESP32 Proxy
+    proxy = temp["ESP32"].proxy_class
+
+    connected = False
+
+    #Poll indefinitely until a connection is met
+    while True:
+  
+        if len(proxy.get_switcher_entries())  > 0 and not connected:
+            connected = True
+            get_runner().restart_backend(False)
+
+        elif len(proxy.get_switcher_entries()) == 0:
+            connected = False
+
+        #Poll every two secondss
+        time.sleep(2)
+
 
 #Callback Function to change interpreter to MicroPython
 def switch_to_microPython():
@@ -368,6 +346,12 @@ def switch_to_python():
 
 
 def load_plugin():
+
+
+    #Initalize secondary thread to poll for a connection of the MCU
+    thread = threading.Thread(target=check_mcu_connection, args=())
+    thread.daemon = True                            # Daemonize thread
+    thread.start()                                  # Start the execution
 
     #No idea what the screenwidth condition does. I don't think it increases the screen size
     if get_workbench().get_ui_mode() == "simple" and get_workbench().winfo_screenwidth() >= 1280:
@@ -407,9 +391,6 @@ def load_plugin():
             "quit": "quit.png",
         }
 
-
-    example = ThreadingExample()
-
     #Change the types of input images depending on the image that is selected.
     res_dir = os.path.join(os.path.dirname(__file__), "res")
     theme_image_map = {}
@@ -425,23 +406,24 @@ def load_plugin():
     get_workbench().set_option("view.ui_theme", "JuiceMind-Theme")
 
 
-
     #Add a button to switch to MicroPython Interpreter
     get_workbench().add_command("Switch MicroPython", "tools", "Run with MicroPython",
                                 switch_to_microPython,
                                 default_sequence=select_sequence("<Control-e>", "<Command-e>"),
                                 group=120,
                                 caption="Use MicroPython",
-                                include_in_toolbar=False)
+                                include_in_toolbar=True)
 
 
-    #Add command on toolabr to implement regular Python Interpreter
+    #Add command on toolbar to implement regular Python Interpreter
     get_workbench().add_command("Switch Regular Python", "tools", "Run with Computer Python",
                                 switch_to_python,
                                 default_sequence=select_sequence("<Control-e>", "<Command-e>"),
                                 group=120,
                                 caption="Use Python",
-                                include_in_toolbar=False)
+                                include_in_toolbar=True)
+
+
 
 
 
