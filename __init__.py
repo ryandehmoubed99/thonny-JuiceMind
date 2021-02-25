@@ -301,7 +301,9 @@ def check_mcu_connection():
         time.sleep(1) 
 
     #Initialize ESP32 Proxy
-    proxy = temp["ESP32"].proxy_class
+    proxy = get_runner().get_backend_proxy()#temp["ESP32"].proxy_class
+
+    #proxy = proxyclass(False)
 
     connected = False
 
@@ -316,6 +318,18 @@ def check_mcu_connection():
             connected = False
 
         #Poll every two secondss
+        print(proxy._detect_potential_ports())
+        #print(proxy.can_run_local_files())
+        #print(proxy.get_cwd())
+        print(get_runner()._cmd_interrupt_enabled())
+        #print(proxy.fetch_next_message())
+
+        
+      
+        port_num = get_workbench().get_option("ESP32.port")
+
+        
+
         time.sleep(2)
 
 
