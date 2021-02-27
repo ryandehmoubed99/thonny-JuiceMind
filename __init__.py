@@ -289,48 +289,71 @@ def update_fonts():
             font.nametofont(name).configure(**options)
 
 
+
+#Todo only restart the backend when it is executed in MicroPython
+
 #Polls from ESP32 proxy in order to check if MCU connection is established
 def check_mcu_connection():
     """ Method that runs forever """
         
     temp = get_workbench().get_backends()
-        
+
     #Wait for startup
     while not bool(temp):
         print("Waiting for Thonny to launch")
         time.sleep(1) 
 
     #Initialize ESP32 Proxy
-    proxy = get_runner().get_backend_proxy()#temp["ESP32"].proxy_class
+    proxy = temp["ESP32"].proxy_class
 
-    #proxy = proxyclass(False)
-
+    
     connected = False
-
-    #Poll indefinitely until a connection is met
+    index = 0
+    slp = 2
+ 
+   
     while True:
   
-        if len(proxy.get_switcher_entries())  > 0 and not connected:
-            connected = True
-            get_runner().restart_backend(False)
-
-        elif len(proxy.get_switcher_entries()) == 0:
+        
+        if (len(proxy._detect_potential_ports()) == 0):
             connected = False
-
-        #Poll every two secondss
-        print(proxy._detect_potential_ports())
-        #print(proxy.can_run_local_files())
-        #print(proxy.get_cwd())
-        print(get_runner()._cmd_interrupt_enabled())
-        #print(proxy.fetch_next_message())
-
+            index = 0
         
+        
+        elif (len(proxy._detect_potential_ports())  > 0 and not connected):
+            
+            if (get_runner()._cmd_interrupt_enabled()):
+                connected = True
+                index = 0
+
+
+            else:
+
+                #Restart the backend and check if it is a succesful connection
+                get_workbench().set_option("ESP32.port", proxy._detect_potential_ports()[index][0])
+                get_runner().restart_backend(False)
+                
+                index = index + 1
+                
+                #Restart search with increased polling time
+                if(index == len(proxy._detect_potential_ports())):
+                    index = 0
+                    slp = slp + 1
+
+        if (connected):
+            slp = 2
+
+           
       
-        port_num = get_workbench().get_option("ESP32.port")
-
         
-
-        time.sleep(2)
+        print("Enabled", get_runner()._cmd_interrupt_enabled())
+        print("Ports", proxy._detect_potential_ports())
+        print("test", get_workbench().get_option("ESP32.port"))
+        print("Index", index)
+        print("Sleep time", slp)
+        
+        time.sleep(slp)
+    
 
 
 #Callback Function to change interpreter to MicroPython
@@ -338,9 +361,6 @@ def switch_to_microPython():
 
     #Configure the default interpreter value to be an ESP32
     get_workbench().set_option("run.backend_name", "ESP32")
-
-
-    get_workbench().set_option("ESP32.port", "auto")
  
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
