@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 #Instance variables
-count = 0
+esp32_boolean = False
 
 
 def pix():
@@ -292,9 +292,14 @@ def update_fonts():
 
 #Todo only restart the backend when it is executed in MicroPython
 
+#Global boolean 
+
 #Polls from ESP32 proxy in order to check if MCU connection is established
 def check_mcu_connection():
     """ Method that runs forever """
+
+    #Initalize global variables
+ 
         
     temp = get_workbench().get_backends()
 
@@ -313,8 +318,9 @@ def check_mcu_connection():
  
    
     while True:
-  
-        
+    
+        #if (get_workbench().get_option("run.backend_name") ==  "ESP32"):
+
         if (len(proxy._detect_potential_ports()) == 0):
             connected = False
             index = 0
@@ -327,41 +333,67 @@ def check_mcu_connection():
                 index = 0
 
 
-            else:
+            else: #Clear
 
-                #Restart the backend and check if it is a succesful connection
-                get_workbench().set_option("ESP32.port", proxy._detect_potential_ports()[index][0])
-                get_runner().restart_backend(False)
+                #Account for suddent disconnection:
+                if(index < len(proxy._detect_potential_ports())):
+                    get_workbench().set_option("ESP32.port", proxy._detect_potential_ports()[index][0])
+                    get_runner().restart_backend(False)
+
                 
                 index = index + 1
                 
                 #Restart search with increased polling time
-                if(index == len(proxy._detect_potential_ports())):
+                if(index >= len(proxy._detect_potential_ports())):
                     index = 0
                     slp = slp + 1
 
         if (connected):
             slp = 2
 
-           
-      
-        
+
+        '''
         print("Enabled", get_runner()._cmd_interrupt_enabled())
         print("Ports", proxy._detect_potential_ports())
         print("test", get_workbench().get_option("ESP32.port"))
         print("Index", index)
         print("Sleep time", slp)
+        '''
         
         time.sleep(slp)
+
+
+def disable_MCU():
+
+    #Disable button when the MCU is selected
+    if (get_workbench().get_option("run.backend_name") == "ESP32"):
+        return False
     
+    #Don't disable if you are on normal interpreter
+    else:
+        return True
+
+
+def disable_computer():
+
+    #Disable button when computer is selected
+    if (get_workbench().get_option("run.backend_name") == "SameAsFrontend"):
+        return False
+    else:
+        return True
+
 
 
 #Callback Function to change interpreter to MicroPython
 def switch_to_microPython():
 
+    
     #Configure the default interpreter value to be an ESP32
     get_workbench().set_option("run.backend_name", "ESP32")
  
+    print(type(get_workbench().get_toolbar_button("Switch MicroPython")))
+   
+
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
 
@@ -370,8 +402,12 @@ def switch_to_microPython():
 #Callback function to change interpreter to regular Python on computer
 def switch_to_python():
 
+    #Somehow change the image path during this event
+  
+
     #Configure the default interpreter value to be an ESP32
     get_workbench().set_option("run.backend_name", "SameAsFrontend")
+
  
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
@@ -435,16 +471,19 @@ def load_plugin():
     #Create a given theme. Similar to Rasberry Pi but with modified buttons
     get_workbench().add_ui_theme("JuiceMind-Theme", "Enhanced Clam", pix, theme_image_map)
 
-
     #Set our theme equal to the default theme during the launch of the IDE
     get_workbench().set_option("view.ui_theme", "JuiceMind-Theme")
 
+    micropython_image = os.path.join(res_dir, "MCU.png")
+    computer_image = os.path.join(res_dir, "computer.png")
 
     #Add a button to switch to MicroPython Interpreter
     get_workbench().add_command("Switch MicroPython", "tools", "Run with MicroPython",
                                 switch_to_microPython,
                                 default_sequence=select_sequence("<Control-e>", "<Command-e>"),
                                 group=120,
+                                tester=disable_MCU,
+                                image = micropython_image,
                                 caption="Use MicroPython",
                                 include_in_toolbar=True)
 
@@ -454,6 +493,8 @@ def load_plugin():
                                 switch_to_python,
                                 default_sequence=select_sequence("<Control-e>", "<Command-e>"),
                                 group=120,
+                                tester=disable_computer,
+                                image = computer_image,
                                 caption="Use Python",
                                 include_in_toolbar=True)
 
