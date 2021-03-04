@@ -23,8 +23,9 @@ GLOBAL_CONFIGURATION_PATH = os.path.join("/etc/xdg/lxsession", DESKTOP_SESSION, 
 logger = logging.getLogger(__name__)
 
 
-#Instance variables
+#Global variables
 esp32_boolean = False
+startup_theme = "JuiceMind-Theme"
 
 
 def pix():
@@ -359,6 +360,7 @@ def check_mcu_connection():
         print("Index", index)
         print("Sleep time", slp)
         '''
+        print(get_workbench().get_option("view.ui_theme"))
         
         time.sleep(slp)
 
@@ -413,9 +415,48 @@ def switch_to_python():
     get_runner().restart_backend(False)
 
 
+'''
 
+def enable_juicemind():
+
+    #Update the default theme to JuiceMind
+    global startup_theme
+    startup_theme = "JuiceMind-Theme"
+
+
+
+def enable_juicemind_tester():
+
+    global startup_theme
+    if(startup_theme == "JuiceMind-Theme"):
+        return False
+    else:
+        return True
+
+
+def disable_juicemind():
+
+    #Update the default theme to JuiceMind
+    global startup_theme
+    #Some other shit
+    startup_theme = "Enhanced Clam"
+
+
+
+def disable_juicemind_tester():
+
+    global startup_theme
+    if(startup_theme == "Enhanced Clam"):
+        return False
+    else:
+        return True
+  
+'''
 
 def load_plugin():
+
+    #Initialize global startup theme
+    global startup_theme
 
 
     #Initalize secondary thread to poll for a connection of the MCU
@@ -472,7 +513,7 @@ def load_plugin():
     get_workbench().add_ui_theme("JuiceMind-Theme", "Enhanced Clam", pix, theme_image_map)
 
     #Set our theme equal to the default theme during the launch of the IDE
-    get_workbench().set_option("view.ui_theme", "JuiceMind-Theme")
+    get_workbench().set_option("view.ui_theme", startup_theme)
 
     micropython_image = os.path.join(res_dir, "MCU.png")
     computer_image = os.path.join(res_dir, "computer.png")
@@ -500,7 +541,29 @@ def load_plugin():
 
 
 
+    '''
+    #Add command on toolbar to enable JuiceMind plugin
+    get_workbench().add_command("Enable JuiceMind", "tools", "Enable JuiceMind",
+                                enable_juicemind,
+                                default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                                group=120,
+                                tester=enable_juicemind_tester,
+                                caption="Enable JuiceMind",
+                                include_in_toolbar=False)
 
+    #Add command on toolbar to disable the JuiceMind plugin and rever to normal
+    get_workbench().add_command("Disable JuiceMind", "tools", "Disable JuiceMind",
+                            disable_juicemind,
+                            default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                            group=120,
+                            tester=disable_juicemind_tester,
+                            image = computer_image,
+                            caption="Disable JuiceMind",
+                            include_in_toolbar=False)
+
+
+
+    '''
 
 
 
