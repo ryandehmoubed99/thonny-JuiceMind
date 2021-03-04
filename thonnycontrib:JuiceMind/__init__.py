@@ -306,7 +306,7 @@ def check_mcu_connection():
 
     #Wait for startup
     while not bool(temp):
-        print("Waiting for Thonny to launch")
+        #print("Waiting for Thonny to launch")
         time.sleep(1) 
 
     #Initialize ESP32 Proxy
@@ -360,7 +360,7 @@ def check_mcu_connection():
         print("Index", index)
         print("Sleep time", slp)
         '''
-        print(get_workbench().get_option("view.ui_theme"))
+        #print(get_workbench().get_option("view.ui_theme"))
         
         time.sleep(slp)
 
@@ -393,7 +393,7 @@ def switch_to_microPython():
     #Configure the default interpreter value to be an ESP32
     get_workbench().set_option("run.backend_name", "ESP32")
  
-    print(type(get_workbench().get_toolbar_button("Switch MicroPython")))
+    #print(type(get_workbench().get_toolbar_button("Switch MicroPython")))
    
 
     #Restart backend to implement changes with the new interpreter
@@ -560,8 +560,6 @@ def load_plugin():
                             image = computer_image,
                             caption="Disable JuiceMind",
                             include_in_toolbar=False)
-
-
 
     '''
 
