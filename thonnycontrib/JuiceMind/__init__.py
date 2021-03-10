@@ -294,7 +294,7 @@ def update_fonts():
 #Todo only restart the backend when it is executed in MicroPython
 
 #Global boolean 
-
+'''
 #Polls from ESP32 proxy in order to check if MCU connection is established
 def check_mcu_connection():
     """ Method that runs forever """
@@ -304,7 +304,7 @@ def check_mcu_connection():
 
     #Wait for startup
     while not bool(temp):
-        #print("Waiting for Thonny to launch")
+       
         time.sleep(1) 
 
     #Initialize ESP32 Proxy
@@ -358,6 +358,8 @@ def check_mcu_connection():
         #Poll for a connection every 2 seconds
         time.sleep(slp)
   
+'''
+
 
 def disable_MCU():
 
@@ -386,11 +388,7 @@ def switch_to_microPython():
     
     #Configure the default interpreter value to be an ESP32
     get_workbench().set_option("run.backend_name", "ESP32")
- 
-    #print(type(get_workbench().get_toolbar_button("Switch MicroPython")))
-    get_workbench().event_generate("HeyBoy")
 
-    #Set the microPython state to auto
 
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
@@ -400,9 +398,7 @@ def switch_to_microPython():
 #Callback function to change interpreter to regular Python on computer
 def switch_to_python():
 
-    #Somehow change the image path during this event
-  
-
+    
     #Configure the default interpreter value to be an ESP32
     get_workbench().set_option("run.backend_name", "SameAsFrontend")
 
@@ -449,12 +445,50 @@ def disable_juicemind_tester():
   
 '''
 
-def test():
-    print("res")
+def connect_device():
+
+    proxy = get_workbench().get_backends()["ESP32"].proxy_class
+
+    #Only do something when the backend that is currently selected is part 
+    if (get_workbench().get_option("run.backend_name") ==  "ESP32"):
+
+        #No USB ports are connected
+        if (len(proxy._detect_potential_ports()) == 0):
+            
+            #Trigger a pop-up screen
+            
+            connected = False
+            index = 0
+
+        else:
+
+            #Iterate over different USB ports until a connection is established
+            number_of_ports = len(proxy._detect_potential_ports())
+
+            #Iterate over all possible ports
+            for i in range(number_of_ports):
+
+                #Check for a suddent disconnection
+                if(i >= number_of_ports):
+                    
+                    #Suddent disconnection. Stop process??
+                    break
+
+                #Add valid index as being connected
+                get_workbench().set_option("ESP32.port", proxy._detect_potential_ports()[i][0])
+
+                #Restart backend to see if a connection was succesfully made
+                get_runner().restart_backend(False)
+
+                #sleep 1 second to ensure that the connection was given enough time
+                time.sleep(0.5)
+
+                #Check if a connection was succesful and break
+                if(get_runner()._cmd_interrupt_enabled()):
+                    break
 
 
-
-def disable_test():
+def test_connection():
 
     #Check if the microcontroller is connected at any point in time
     if (get_workbench().get_option("run.backend_name") ==  "ESP32" and get_runner()._cmd_interrupt_enabled()):
@@ -465,16 +499,11 @@ def disable_test():
 
 
 
-def print_hello(event):
-
-    print("hello")
-
-
 def load_plugin():
 
     
     '''
-    #Initialize global startup theme
+    Initialize global startup theme
     global startup_theme
 
 
@@ -485,7 +514,7 @@ def load_plugin():
     '''
     
     #get_workbench().bind("BackendRestart", print_hello)
-    get_workbench().bind("HeyBoy", print_hello)
+    #get_workbench().bind("HeyBoy", print_hello)
 
 
 
@@ -566,20 +595,19 @@ def load_plugin():
                                 include_in_toolbar=True)
 
 
+    
 
     #Add command on toolbar to implement regular Python Interpreter
     get_workbench().add_command("test", "tools", "Run with Computer Python",
-                                test,
+                                connect_device,
                                 default_sequence=select_sequence("<Control-e>", "<Command-e>"),
                                 group=120,
-                                tester=disable_test,
+                                tester=test_connection,
                                 image = test_image,
                                 caption="Use Python",
                                 include_in_toolbar=True)
 
-
-
-
+    
 
     '''
     #Add command on toolbar to enable JuiceMind plugin
