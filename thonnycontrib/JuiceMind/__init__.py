@@ -299,9 +299,7 @@ def update_fonts():
 def check_mcu_connection():
     """ Method that runs forever """
 
-    #Initalize global variables
- 
-        
+    #Get different backends from Thonny
     temp = get_workbench().get_backends()
 
     #Wait for startup
@@ -317,53 +315,49 @@ def check_mcu_connection():
     index = 0
     slp = 2
  
-   
     while True:
     
-        #if (get_workbench().get_option("run.backend_name") ==  "ESP32"):
-
+        
+        #No USB devices are connected
         if (len(proxy._detect_potential_ports()) == 0):
             connected = False
             index = 0
         
-        
+        #A port is present and the device is currently not connected
         elif (len(proxy._detect_potential_ports())  > 0 and not connected):
             
+
+            #Successful connection when cmd_interrupt_enabled == true
             if (get_runner()._cmd_interrupt_enabled()):
                 connected = True
                 index = 0
 
+            #Search for a device that is connected
+            else: 
 
-            else: #Clear
-
-                #Account for suddent disconnection:
+                #search each port
                 if(index < len(proxy._detect_potential_ports())):
+                    
+                    #Add valid index as being connected
                     get_workbench().set_option("ESP32.port", proxy._detect_potential_ports()[index][0])
+                    
+                    #Restart backend to see if a connection was succesfully made
                     get_runner().restart_backend(False)
+                   
 
                 
+                #Increase our port index
                 index = index + 1
                 
-                #Restart search with increased polling time
+                #Restart search if we have looked at every index in our potential connected ports
                 if(index >= len(proxy._detect_potential_ports())):
                     index = 0
-                    slp = slp + 1
+                    #slp = slp + 1
 
-        if (connected):
-            slp = 2
-
-
-        '''
-        print("Enabled", get_runner()._cmd_interrupt_enabled())
-        print("Ports", proxy._detect_potential_ports())
-        print("test", get_workbench().get_option("ESP32.port"))
-        print("Index", index)
-        print("Sleep time", slp)
-        '''
-        #print(get_workbench().get_option("view.ui_theme"))
         
+        #Poll for a connection every 2 seconds
         time.sleep(slp)
-
+  
 
 def disable_MCU():
 
@@ -394,7 +388,9 @@ def switch_to_microPython():
     get_workbench().set_option("run.backend_name", "ESP32")
  
     #print(type(get_workbench().get_toolbar_button("Switch MicroPython")))
-   
+    get_workbench().event_generate("HeyBoy")
+
+    #Set the microPython state to auto
 
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
@@ -453,8 +449,31 @@ def disable_juicemind_tester():
   
 '''
 
+def test():
+    print("res")
+
+
+
+def disable_test():
+
+    #Check if the microcontroller is connected at any point in time
+    if (get_workbench().get_option("run.backend_name") ==  "ESP32" and get_runner()._cmd_interrupt_enabled()):
+        return False
+
+    else:
+        return True
+
+
+
+def print_hello(event):
+
+    print("hello")
+
+
 def load_plugin():
 
+    
+    '''
     #Initialize global startup theme
     global startup_theme
 
@@ -463,6 +482,12 @@ def load_plugin():
     thread = threading.Thread(target=check_mcu_connection, args=())
     thread.daemon = True                            # Daemonize thread
     thread.start()                                  # Start the execution
+    '''
+    
+    #get_workbench().bind("BackendRestart", print_hello)
+    get_workbench().bind("HeyBoy", print_hello)
+
+
 
     #No idea what the screenwidth condition does. I don't think it increases the screen size
     if get_workbench().get_ui_mode() == "simple" and get_workbench().winfo_screenwidth() >= 1280:
@@ -517,6 +542,7 @@ def load_plugin():
 
     micropython_image = os.path.join(res_dir, "MCU.png")
     computer_image = os.path.join(res_dir, "computer.png")
+    test_image = os.path.join(res_dir, "quit.png")
 
     #Add a button to switch to MicroPython Interpreter
     get_workbench().add_command("Switch MicroPython", "tools", "Run with MicroPython",
@@ -538,6 +564,20 @@ def load_plugin():
                                 image = computer_image,
                                 caption="Use Python",
                                 include_in_toolbar=True)
+
+
+
+    #Add command on toolbar to implement regular Python Interpreter
+    get_workbench().add_command("test", "tools", "Run with Computer Python",
+                                test,
+                                default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                                group=120,
+                                tester=disable_test,
+                                image = test_image,
+                                caption="Use Python",
+                                include_in_toolbar=True)
+
+
 
 
 
