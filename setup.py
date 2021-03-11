@@ -1,7 +1,5 @@
 from setuptools import setup
 
-
-
 setup (
         name="thonny-JuiceMind",
         version="0.0.9",
@@ -9,7 +7,7 @@ setup (
         long_description="""JuiceMind plug-in which adds JuiceMind theme, automatic polling for ESP32 connection, and easy switching between computer and ESP32.
 More info about JuiceMind: www.JuiceMind.com.""",
         url="https://github.com/ryandehmoubed99/thonny-JuiceMind",
-        download_url="https://github.com/ryandehmoubed99/thonny-JuiceMind/archive/v0.0.8.tar.gz",
+        #download_url="https://github.com/ryandehmoubed99/thonny-JuiceMind/archive/v0.0.8.tar.gz",
         author="Ryan Dehmoubed",
         author_email="r.dehmoubed99@gmail.com",
         license="MIT",
