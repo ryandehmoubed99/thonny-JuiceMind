@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup (
         name="thonny-JuiceMind",
-        version="0.0.11",
+        version="0.0.12",
         description="Enhanced JuiceMind features for Thonny",
         long_description="""JuiceMind plug-in which adds JuiceMind theme, automatic polling for ESP32 connection, and easy switching between computer and ESP32.
 More info about JuiceMind: www.JuiceMind.com.""",
@@ -39,6 +39,7 @@ More info about JuiceMind: www.JuiceMind.com.""",
         ],
         keywords="IDE education programming  Thonny JuiceMind",
         platforms=["Windows", "macOS", "Linux"],
+        requires_dist=["thonny (>=3.2.1)"],
         python_requires=">=3.5",
         package_data={'thonnycontrib.JuiceMind': ['res/*']},
         install_requires=["thonny >= 3.2.1"],
