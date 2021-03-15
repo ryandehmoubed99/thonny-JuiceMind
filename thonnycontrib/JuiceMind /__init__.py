@@ -444,9 +444,10 @@ def disable_juicemind_tester():
         return True
   
 '''
+'''
+def establish_serial_connection():
 
-def connect_device():
-
+     
     proxy = get_workbench().get_backends()["ESP32"].proxy_class
 
     #Only do something when the backend that is currently selected is part 
@@ -465,6 +466,8 @@ def connect_device():
             #Iterate over different USB ports until a connection is established
             number_of_ports = len(proxy._detect_potential_ports())
 
+            print(number_of_ports)
+
             #Iterate over all possible ports
             for i in range(number_of_ports):
 
@@ -481,41 +484,104 @@ def connect_device():
                 get_runner().restart_backend(False)
 
                 #sleep 1 second to ensure that the connection was given enough time
-                time.sleep(0.5)
+                
+                #print("Reached")
+                #print(get_runner()._cmd_interrupt_enabled())
 
                 #Check if a connection was succesful and break
                 if(get_runner()._cmd_interrupt_enabled()):
+                    
                     break
+
+        #print(get_runner()._cmd_interrupt_enabled())
+'''
+
+index = 0
+proxy = None
+prev_connection = None
+
+
+def connect_device():
+
+    global index
+    global proxy
+
+    #Only enable device connection if the ESP32 mode is selected
+    if (get_workbench().get_option("run.backend_name") ==  "ESP32"):
+
+        proxy = get_workbench().get_backends()["ESP32"].proxy_class
+
+        #There is more than one port to connect to
+        if (len(proxy._detect_potential_ports()) > 0):
+
+            #Establish a serial connection with a specific serial port
+            USB_name = proxy._detect_potential_ports()[index][0]
+            
+            #Increment the index
+            index = index + 1
+
+            #Establish a serial connection
+            establish_serial_connection(USB_name)
+
+            
+
+
+def establish_serial_connection(USB_name):
+
+    #Change the setting for the USB connection 
+    get_workbench().set_option("ESP32.port", USB_name)
+
+    #Restart the backend to establish changes 
+    get_runner().restart_backend(False)
+
 
 
 def test_connection():
 
+    global prev_connection
+    global index
+    global proxy
+
+    #print(get_runner()._cmd_interrupt_enabled())
+
     #Check if the microcontroller is connected at any point in time
-    if (get_workbench().get_option("run.backend_name") ==  "ESP32" and get_runner()._cmd_interrupt_enabled()):
+    if (get_workbench().get_option("run.backend_name") ==  "ESP32" and get_runner()._cmd_interrupt_enabled()): 
+
+        #True -> Stays true the entire time        
+        
+        #Connect an MCU
+        prev_connection = get_runner()._cmd_interrupt_enabled()
+
         return False
 
+    #Check the previous state that it was connected.
+    elif (get_runner()._cmd_interrupt_enabled() == None and prev_connection == True and proxy != None):
+
+        #Try connecting again with a different USB port
+        if(len(proxy._detect_potential_ports()) > 1 and index < len(proxy._detect_potential_ports())):
+
+            USB_name = proxy._detect_potential_ports()[index][0]
+            index = index + 1
+            prev_connection = get_runner()._cmd_interrupt_enabled()
+            establish_serial_connection(USB_name)
+            return False
+            
+        else:
+
+            #Set pressed button == False
+            prev_connection = None
+            index = 0
+            return True
+
     else:
+
+        prev_connection = None
         return True
 
 
 
+
 def load_plugin():
-
-    
-    '''
-    Initialize global startup theme
-    global startup_theme
-
-
-    #Initalize secondary thread to poll for a connection of the MCU
-    thread = threading.Thread(target=check_mcu_connection, args=())
-    thread.daemon = True                            # Daemonize thread
-    thread.start()                                  # Start the execution
-    '''
-    
-    #get_workbench().bind("BackendRestart", print_hello)
-    #get_workbench().bind("HeyBoy", print_hello)
-
 
 
     #No idea what the screenwidth condition does. I don't think it increases the screen size
