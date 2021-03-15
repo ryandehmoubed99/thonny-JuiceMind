@@ -293,6 +293,74 @@ def update_fonts():
 
 #Todo only restart the backend when it is executed in MicroPython
 
+#Global boolean 
+'''
+#Polls from ESP32 proxy in order to check if MCU connection is established
+def check_mcu_connection():
+    """ Method that runs forever """
+
+    #Get different backends from Thonny
+    temp = get_workbench().get_backends()
+
+    #Wait for startup
+    while not bool(temp):
+       
+        time.sleep(1) 
+
+    #Initialize ESP32 Proxy
+    proxy = temp["ESP32"].proxy_class
+
+    
+    connected = False
+    index = 0
+    slp = 2
+ 
+    while True:
+    
+        
+        #No USB devices are connected
+        if (len(proxy._detect_potential_ports()) == 0):
+            connected = False
+            index = 0
+        
+        #A port is present and the device is currently not connected
+        elif (len(proxy._detect_potential_ports())  > 0 and not connected):
+            
+
+            #Successful connection when cmd_interrupt_enabled == true
+            if (get_runner()._cmd_interrupt_enabled()):
+                connected = True
+                index = 0
+
+            #Search for a device that is connected
+            else: 
+
+                #search each port
+                if(index < len(proxy._detect_potential_ports())):
+                    
+                    #Add valid index as being connected
+                    get_workbench().set_option("ESP32.port", proxy._detect_potential_ports()[index][0])
+                    
+                    #Restart backend to see if a connection was succesfully made
+                    get_runner().restart_backend(False)
+                   
+
+                
+                #Increase our port index
+                index = index + 1
+                
+                #Restart search if we have looked at every index in our potential connected ports
+                if(index >= len(proxy._detect_potential_ports())):
+                    index = 0
+                    #slp = slp + 1
+
+        
+        #Poll for a connection every 2 seconds
+        time.sleep(slp)
+  
+'''
+
+
 def disable_MCU():
 
     #Disable button when the MCU is selected
@@ -345,6 +413,8 @@ proxy = None
 prev_connection = None
 
 #Time difference
+
+
 
 def connect_device():
 
@@ -520,6 +590,31 @@ def load_plugin():
 
     
 
+    '''
+    #Add command on toolbar to enable JuiceMind plugin
+    get_workbench().add_command("Enable JuiceMind", "tools", "Enable JuiceMind",
+                                enable_juicemind,
+                                default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                                group=120,
+                                tester=enable_juicemind_tester,
+                                caption="Enable JuiceMind",
+                                include_in_toolbar=False)
+
+    #Add command on toolbar to disable the JuiceMind plugin and rever to normal
+    get_workbench().add_command("Disable JuiceMind", "tools", "Disable JuiceMind",
+                            disable_juicemind,
+                            default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                            group=120,
+                            tester=disable_juicemind_tester,
+                            image = computer_image,
+                            caption="Disable JuiceMind",
+                            include_in_toolbar=False)
+
+    '''
+
+
+
+    
 
 
     
