@@ -1,0 +1,39 @@
+Metadata-Version: 1.2
+Name: thonny-JuiceMind
+Version: 0.0.15
+Summary: Enhanced JuiceMind features for Thonny
+Home-page: https://github.com/ryandehmoubed99/thonny-JuiceMind
+Author: Ryan Dehmoubed
+Author-email: r.dehmoubed99@gmail.com
+License: MIT
+Description: JuiceMind plug-in which adds JuiceMind theme, automatic polling for ESP32 connection, and easy switching between computer and ESP32.
+        More info about JuiceMind: www.JuiceMind.com.
+Keywords: IDE education programming  Thonny JuiceMind
+Platform: Windows
+Platform: macOS
+Platform: Linux
+Classifier: Environment :: MacOS X
+Classifier: Environment :: Win32 (MS Windows)
+Classifier: Environment :: X11 Applications
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: Freeware
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Topic :: Education
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Embedded Systems
+Requires-Python: >=3.5
