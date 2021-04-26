@@ -290,12 +290,14 @@ def update_fonts():
             font.nametofont(name).configure(**options)
 
 
-
+'''
 
 def disable_MCU():
 
+    print(get_workbench().get_option("run.backend_name"))
+
     #Disable button when the MCU is selected
-    if (get_workbench().get_option("run.backend_name") == "ESP32"):
+    if (get_workbench().get_option("run.backend_name") == "ESP8266"):
         return False
     
     #Don't disable if you are on normal interpreter
@@ -318,11 +320,14 @@ def switch_to_microPython():
 
     
     #Configure the default interpreter value to be an ESP32
-    get_workbench().set_option("run.backend_name", "ESP32")
+    get_workbench().set_option("run.backend_name", "ESP8266")
 
 
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
+
+
+
 
 
 
@@ -337,6 +342,7 @@ def switch_to_python():
     #Restart backend to implement changes with the new interpreter
     get_runner().restart_backend(False)
 
+'''
 
 
 #index of current search of USB devices
@@ -354,7 +360,7 @@ prev_connection = None
 def connect_device():
 
 
-    proxy =  get_workbench().get_backends()["ESP32"].proxy_class
+    proxy =  get_workbench().get_backends()["ESP8266"].proxy_class
 
     #If nothing is connected don't do anything -> Maybe in the future make a pop-up that says to plug-in a device
 
@@ -417,7 +423,7 @@ def connect_device():
 def establish_serial_connection(USB_name):
 
     #Change the setting for the USB connection 
-    get_workbench().set_option("ESP32.port", USB_name)
+    get_workbench().set_option("ESP8266.port", USB_name)
 
     #Restart the backend to establish changes 
     get_runner().restart_backend(False)
@@ -426,16 +432,104 @@ def establish_serial_connection(USB_name):
 
 def test_connection():
 
-    #Connected when get_runner() connection feedback is true and we are using our ESP32 interpreter
-    if ((get_workbench().get_option("run.backend_name") ==  "ESP32" and get_runner()._cmd_interrupt_enabled()) or (get_workbench().get_option("run.backend_name") ==  "SameAsFrontend")):
+    toolbar_button = get_workbench().get_toolbar_button("connect_button")
+    res_dir = os.path.join(os.path.dirname(__file__), "res")
+    img2 = None
+
+    
+
+    #If the current interpreter is the computer Python interpreter, make the image disabled and transparent.
+    if (get_workbench().get_option("run.backend_name") ==  "SameAsFrontend"):
+
+        microcontroller_selected_image = os.path.join(res_dir, "quit.png")
+        img2 = get_workbench().get_image(microcontroller_selected_image)
+    
+        toolbar_button.configure(image=img2)
+        toolbar_button.image = img2
+
+        #Change the image type to be empty
+        return False
+
+
+    #If the interpreter is ESP8266 and it is connected, make the image disabled and say that it is connected
+    elif ((get_workbench().get_option("run.backend_name") ==  "ESP8266" and get_runner()._cmd_interrupt_enabled())):
+
+
+        microcontroller_selected_image = os.path.join(res_dir, "connected-button.png")
+        img2 = get_workbench().get_image(microcontroller_selected_image)
+    
+        toolbar_button.configure(image=img2)
+        toolbar_button.image = img2
 
         return False
 
-    #If it is computer Python, you can't connect
+    
+    #If the interpreter is ESP8266 and it is connected, make the image enabled and display the connected button.
     else:
-  
+
+        microcontroller_selected_image = os.path.join(res_dir, "connect.png")
+        img2 = get_workbench().get_image(microcontroller_selected_image)
+    
+        toolbar_button.configure(image=img2)
+        toolbar_button.image = img2
+
         return True
 
+
+#Used for adding spacing between the buttons
+def always_disabled():
+
+    #Disable button when computer is selected.
+    return False
+
+
+
+#Used for the toggle bewteen MicroPython and regular Python.
+def always_enabled():
+
+    #Enable the button when computer is selected.
+    return True
+
+
+
+def toggle_python():
+    
+
+    toolbar_button = get_workbench().get_toolbar_button("toggle_python")
+    res_dir = os.path.join(os.path.dirname(__file__), "res")
+    img2 = None
+
+
+    #Currently Computer is selected -> Switch to the Microcontroller interpreter
+    if (get_workbench().get_option("run.backend_name") ==  "SameAsFrontend"):
+    
+
+        microcontroller_selected_image = os.path.join(res_dir, "MCU_selected.png")
+        img2 = get_workbench().get_image(microcontroller_selected_image)
+        
+        #Change the backend to ESP8266
+        get_workbench().set_option("run.backend_name", "ESP8266")
+
+        #Restart the backend to establish changes
+        get_runner().restart_backend(False)
+    
+
+    #Currently Microcontroller is selected -> Switch to the computer interpreter
+    else:
+    
+    
+        computer_selected_image = os.path.join(res_dir, "computer_selected.png")
+        img2 = get_workbench().get_image(computer_selected_image)
+       
+        #Change the backend to Regular Python Interpreter
+        get_workbench().set_option("run.backend_name", "SameAsFrontend")
+
+        #Restart the backend to establish changes
+        get_runner().restart_backend(False)
+
+        
+    toolbar_button.configure(image=img2)
+    toolbar_button.image = img2
 
 
 
@@ -538,9 +632,19 @@ def load_plugin():
     get_workbench().set_option("view.ui_theme", startup_theme)
 
     micropython_image = os.path.join(res_dir, "MCU.png")
-    computer_image = os.path.join(res_dir, "computer.png")
-    test_image = os.path.join(res_dir, "quit.png")
+    computer_selected_image = os.path.join(res_dir, "computer_selected.png")
+    connect_image = os.path.join(res_dir, "connect.png")
+    #transparent_background = os.path.join(res_dir, "transparent.png")
 
+    #Set the initial backend to be default, normal computer
+
+
+    #Change the backend to ESP8266
+    get_workbench().set_option("run.backend_name", "SameAsFrontend")
+
+
+
+    '''
     #Add a button to switch to MicroPython Interpreter
     get_workbench().add_command("Switch MicroPython", "tools", "Run with MicroPython",
                                 switch_to_microPython,
@@ -550,8 +654,10 @@ def load_plugin():
                                 image = micropython_image,
                                 caption="Use MicroPython",
                                 include_in_toolbar=True)
+    '''
 
 
+    '''
     #Add command on toolbar to implement regular Python Interpreter
     get_workbench().add_command("Switch Regular Python", "tools", "Run with Computer Python",
                                 switch_to_python,
@@ -562,17 +668,31 @@ def load_plugin():
                                 caption="Use Python",
                                 include_in_toolbar=True)
 
+    '''
 
-    
 
-    #Add command on toolbar to implement regular Python Interpreter
-    get_workbench().add_command("test", "tools", "Run with Computer Python",
+
+    #One command on the toolbar that toggles between Python image and microcontroller image
+    get_workbench().add_command("toggle_python", "tools", "Toggle Python",
+                                toggle_python,
+                                default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                                group=120,
+                                tester=always_enabled,
+                                image = computer_selected_image,
+                                caption="Use Python",
+                                include_in_toolbar=True)
+
+
+
+
+    #Add command on toolbar to connect
+    get_workbench().add_command("connect_button", "tools", "Run with Computer Python",
                                 connect_device,
                                 default_sequence=select_sequence("<Control-e>", "<Command-e>"),
                                 group=120,
                                 tester=test_connection,
-                                image = test_image,
-                                caption="Use Python",
+                                image = connect_image,
+                                caption="Connect Button",
                                 include_in_toolbar=True)
 
 
