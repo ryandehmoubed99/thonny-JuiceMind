@@ -634,7 +634,7 @@ def load_plugin():
     micropython_image = os.path.join(res_dir, "MCU.png")
     computer_selected_image = os.path.join(res_dir, "computer_selected.png")
     connect_image = os.path.join(res_dir, "connect.png")
-    #transparent_background = os.path.join(res_dir, "transparent.png")
+    transparent_background = os.path.join(res_dir, "transparent_background.png")
 
     #Set the initial backend to be default, normal computer
 
@@ -670,7 +670,15 @@ def load_plugin():
 
     '''
 
-
+    get_workbench().add_command("add_spacing", "tools", "",
+                                toggle_python,
+                                default_sequence=select_sequence("<Control-e>", "<Command-e>"),
+                                group=120,
+                                tester=always_disabled,
+                                image = transparent_background,
+                                caption="Use Python",
+                                include_in_toolbar=True,
+                                include_in_menu=False)
 
     #One command on the toolbar that toggles between Python image and microcontroller image
     get_workbench().add_command("toggle_python", "tools", "Toggle Python",
@@ -694,28 +702,3 @@ def load_plugin():
                                 image = connect_image,
                                 caption="Connect Button",
                                 include_in_toolbar=True)
-
-
-
-    
-
-
-    
-
-
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
-   
-
