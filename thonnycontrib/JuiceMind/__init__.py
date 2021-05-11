@@ -441,7 +441,7 @@ def test_connection():
     #If the current interpreter is the computer Python interpreter, make the image disabled and transparent.
     if (get_workbench().get_option("run.backend_name") ==  "SameAsFrontend"):
 
-        microcontroller_selected_image = os.path.join(res_dir, "quit.png")
+        microcontroller_selected_image = os.path.join(res_dir, "transparent_background.png")
         img2 = get_workbench().get_image(microcontroller_selected_image)
     
         toolbar_button.configure(image=img2)
