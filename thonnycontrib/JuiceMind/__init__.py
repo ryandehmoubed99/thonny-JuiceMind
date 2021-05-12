@@ -694,7 +694,7 @@ def load_plugin():
 
 
     #Add command on toolbar to connect
-    get_workbench().add_command("connect_button", "tools", "Run with Computer Python",
+    get_workbench().add_command("connect_button", "tools", "",
                                 connect_device,
                                 default_sequence=select_sequence("<Control-e>", "<Command-e>"),
                                 group=120,
